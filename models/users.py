@@ -1,7 +1,5 @@
 from controllers import clcrypto
 
-key = '38b71ebc84637da96b7735e1bd0e0461'
-
 
 class User(object):
     __id = None
@@ -34,8 +32,17 @@ class User(object):
             values = (self.username, self.email, self.hashed_password)
             cursor.execute(sql, values)
             self.__id = cursor.fetchone()[0]  # albo cursor.fetchone()['id']
+            cursor.close()
             return True
-        return False
+        else:
+            sql = """UPDATE Users SET username=%s, email=%s, hashed_password=%s,
+                            WHERE id=%s"""
+            values = (self.username, self.email, self.hashed_password, self.id)
+            cursor.execute(sql, values)
+            cursor.close()
+            return True
+
+
 
     @staticmethod
     def load_user_by_id(cursor, user_id):
@@ -64,17 +71,12 @@ class User(object):
             loaded_user.email = row[2]
             loaded_user.__hashed_password = row[3]
             ret.append(loaded_user)
+        cursor.close()
         return ret
 
     def delete(self, cursor):
         sql = "DELETE FROM Users WHERE id=%s"
         cursor.execute(sql, (self.__id,))
         self.__id = -1
+        cursor.close()
         return True
-
-
-a = User()
-a.username = 'Zuza'
-a.email = 'aaa@aaa.com'
-a.set_password('abrakadabra', key)
-print(clcrypto.check_password('abrakadabra', a.hashed_password))
