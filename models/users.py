@@ -43,7 +43,6 @@ class User(object):
             return True
 
 
-
     @staticmethod
     def load_user_by_id(cursor, user_id):
         sql = "SELECT id, username, email, hashed_password FROM users WHERE id=%s"
@@ -71,7 +70,6 @@ class User(object):
             loaded_user.email = row[2]
             loaded_user.__hashed_password = row[3]
             ret.append(loaded_user)
-        cursor.close()
         return ret
 
     def delete(self, cursor):
