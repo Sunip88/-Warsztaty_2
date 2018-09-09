@@ -9,7 +9,6 @@ class User(object):
 
     def __init__(self):
         self.__id = -1
-
         self.username = ""
         self.email = ""
         self.__hashed_password = ""
@@ -35,3 +34,18 @@ class User(object):
             self.__id = cursor.fetchone()[0]  # albo cursor.fetchone()['id']
             return True
         return False
+
+    @staticmethod
+    def load_user_by_id(cursor, user_id):
+        sql = "SELECT id, username, email, hashed_password FROM users WHERE id=%s"
+        cursor.execute(sql, (user_id,))  # (user_id, ) - bo tworzymy krotkę
+        data = cursor.fetchone()
+        if data:
+            loaded_user = User()
+            loaded_user.__id = data[0]
+            loaded_user.username = data[1]
+            loaded_user.email = data[2]
+            loaded_user.__hashed_password = data[3]
+            return loaded_user
+        else:
+            return None
