@@ -17,6 +17,7 @@ to_id int,
 message text,
 creation_date timestamp
 PRIMARY KEY (id)
+FOREIGN KEY (to_id) REFERENCES users(id)
 );
 
 
