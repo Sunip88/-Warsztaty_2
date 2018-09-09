@@ -49,3 +49,23 @@ class User(object):
             return loaded_user
         else:
             return None
+
+    @staticmethod
+    def load_all_users(cursor):
+        sql = "SELECT id, username, email, hashed_password FROM Users"
+        ret = []
+        cursor.execute(sql)
+        for row in cursor.fetchall():
+            loaded_user = User()
+            loaded_user.__id = row[0]
+            loaded_user.username = row[1]
+            loaded_user.email = row[2]
+            loaded_user.__hashed_password = row[3]
+            ret.append(loaded_user)
+        return ret
+
+    def delete(self, cursor):
+        sql = "DELETE FROM Users WHERE id=%s"
+        cursor.execute(sql, (self.__id,))
+        self.__id = -1
+        return True
