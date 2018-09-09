@@ -34,4 +34,4 @@ class User(object):
             cursor.execute(sql, values)
             self.__id = cursor.fetchone()[0]  # albo cursor.fetchone()['id']
             return True
-      return False
+        return False
