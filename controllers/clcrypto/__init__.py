@@ -80,5 +80,3 @@ def check_password(pass_to_check, hashed):
         return False
 
 
-aaa = password_hash('aaa', generate_salt())
-print(check_password('aab', aaa))

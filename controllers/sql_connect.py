@@ -33,5 +33,5 @@ def execute_sql(cnx, sql_file):
 
 if __name__ == "__main__":
     connection = create_connection("postgres")
-    # execute_sql(connection, "a3_sql.sql")
+    execute_sql(connection, "create_data_base_table.sql")
     connection.close()

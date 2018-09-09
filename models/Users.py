@@ -1,5 +1,7 @@
 from controllers import clcrypto
 
+key = '38b71ebc84637da96b7735e1bd0e0461'
+
 
 class User(object):
     __id = None
@@ -69,3 +71,10 @@ class User(object):
         cursor.execute(sql, (self.__id,))
         self.__id = -1
         return True
+
+
+a = User()
+a.username = 'Zuza'
+a.email = 'aaa@aaa.com'
+a.set_password('abrakadabra', key)
+print(clcrypto.check_password('abrakadabra', a.hashed_password))
