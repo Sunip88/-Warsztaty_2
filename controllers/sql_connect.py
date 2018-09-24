@@ -14,7 +14,6 @@ def create_connection(db_name):
         print("Brak połączenia")
     return cnx
 
-
 def execute_sql(cnx, sql_file):
     cursor = cnx.cursor()
     file = open(sql_file, 'r')

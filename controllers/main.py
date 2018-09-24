@@ -15,20 +15,22 @@ if __name__ == '__main__':
     # u_2.email = 'mail2@mail.com'
     # u_2.set_password('hokuspokus', clcrypto.generate_salt())
 
-    # u_3 = User()
-    # u_3.username = 'Xaxaxa hahaha'
-    # u_3.email = 'mail3@mail.com'
-    # u_3.set_password('marokookoko', clcrypto.generate_salt())
+    u_3 = User()
+    u_3.username = 'abcabc'
+    u_3.email = 'mail4@mail.com'
+    u_3.set_password('abcabc', clcrypto.generate_salt())
 
     cnx = create_connection('warsztaty_2')
     cursor = cnx.cursor()
 
     # u_1.save_to_db(cursor)
     # u_2.save_to_db(cursor)
-    # u_3.save_to_db(cursor)
+    u_3.save_to_db(cursor)
+    # a = User.load_user_by_name(cursor, 'Antonii Kinper').email
+    # print(a)
     # a = User.load_user_by_id(cursor, 1)
     # print(a.username)
-    # print(a.hashed_password)
+    # print(a.email)
     #
     # a = User.load_all_users(cursor)
     # for i in a:
@@ -45,6 +47,6 @@ if __name__ == '__main__':
     # m_2.text = 'prezes naszego klubu'
     # m_2.creation_date = datetime.date.today().strftime('%Y-%m-%d')
     # m_1.save_to_db(cursor)
-    a = Message.load_all_messages(cursor)
-    for i in a:
-        print(i.text)
+    # a = Message.load_all_messages(cursor)
+    # for i in a:
+    #     print(i.text)
