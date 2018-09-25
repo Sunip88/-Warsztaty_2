@@ -15,7 +15,7 @@ to_id int,
 text text,
 creation_date timestamp,
 PRIMARY KEY (id),
-FOREIGN KEY (to_id) REFERENCES users(id)
+FOREIGN KEY (to_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 

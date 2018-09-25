@@ -35,8 +35,7 @@ class User(object):
             cursor.close()
             return True
         else:
-            sql = """UPDATE Users SET username=%s, email=%s, hashed_password=%s,
-                            WHERE id=%s"""
+            sql = """UPDATE Users SET username=%s, email=%s, hashed_password=%s WHERE id=%s"""
             values = (self.username, self.email, self.hashed_password, self.id)
             cursor.execute(sql, values)
             cursor.close()
@@ -62,6 +61,22 @@ class User(object):
     def load_user_by_name(cursor, user_name):
         sql = "SELECT id, username, email, hashed_password FROM users WHERE username=%s"
         cursor.execute(sql, (user_name,))
+        data = cursor.fetchone()
+        if data:
+            loaded_user = User()
+            loaded_user.__id = data[0]
+            loaded_user.username = data[1]
+            loaded_user.email = data[2]
+            loaded_user.__hashed_password = data[3]
+            return loaded_user
+        else:
+            return None
+
+
+    @staticmethod
+    def load_user_by_mail(cursor, email):
+        sql = "SELECT id, username, email, hashed_password FROM users WHERE email=%s"
+        cursor.execute(sql, (email,))
         data = cursor.fetchone()
         if data:
             loaded_user = User()
