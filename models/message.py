@@ -10,7 +10,7 @@ class Message(object):
         self.from_id = ""
         self.to_id = ""
         self.text = ""
-        self.creation_date = "" #datetime.date.today().strftime('%Y-%m-%d')
+        self.creation_date = ""
 
     @property
     def id(self):
@@ -37,6 +37,10 @@ class Message(object):
     @staticmethod
     def load_all_message_for_user(cursor, user_id):
         sql = "SELECT id, from_id, to_id, text, creation_date FROM message where to_id=%s order by creation_date DESC"
+        # sql = """SELECT message.id, message.from_id, message.to_id, message.text, message.creation_date,
+        #         t1.username as username_to, t2.username as username_from, t1.email as email_to, t2.email as email_from
+        #         FROM message Join users t1 on t1.id=message.to_id Join users t2 on t2.id=message.from_id where to_id=%s
+        #         order by creation_date DESC"""
         ret = []
         cursor.execute(sql, (user_id,))
         for row in cursor.fetchall():

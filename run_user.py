@@ -7,8 +7,8 @@ import re
 
 
 def check_email(cursor):
-    email = input('Podaj mail:\n')
-    pattern = re.compile(r'^[_a-zA-Z0-9-]+(\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,}){1}$')
+    email = input("Podaj mail:\n")
+    pattern = re.compile(r"^[_a-zA-Z0-9-]+(\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,}){1}$")
     match = pattern.match(email)
     match2 = User.load_user_by_mail(cursor, email)
     while not match or match2 is not None:
@@ -16,18 +16,18 @@ def check_email(cursor):
             print("Adres email jest błędny. Proszę podaj adres w poprawnym formacie")
         elif match2 is not None:
             print("Adres email jest juz uzywany. Proszę podaj inny adres")
-        email = input('Podaj mail:\n')
+        email = input("Podaj mail:\n")
         match = pattern.match(email)
         match2 = User.load_user_by_mail(cursor, email)
     return match.string
 
 
 def new_password(password):
-    pattern = re.compile(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$')
+    pattern = re.compile(r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$")
     match = pattern.match(password)
     while not match:
         print("Hasło powinno skladac sie z 8 znakow w tym jedna litera, jedna liczba i jeden ze znakw specjalnych (@$!%*#?&)")
-        password = input('Podaj hasło:\n')
+        password = input("Podaj hasło:\n")
         match = pattern.match(password)
     return match.string
 
@@ -35,19 +35,19 @@ def new_password(password):
 def new_name(name):
     while len(name) < 3:
         print("Nazwa użytkownika powinna składać się z przynajmniej 3 znaków")
-        name = input('Podaj Nazwe uzytkownika:\n')
+        name = input("Podaj Nazwe uzytkownika:\n")
     return name
 
 
 def set_options():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--password", dest='password', help="User password")
-    parser.add_argument("-n", "--new-pass", dest='newpass', help="User new password")
-    parser.add_argument("-d", "--delete", dest='delete', default=False, action='store_true', help="Delete user")
-    parser.add_argument("-e", "--edit", dest='edit', action='store_true', help="Change user password")
+    parser.add_argument("-p", "--password", dest="password", help="User password")
+    parser.add_argument("-n", "--new-pass", dest="newpass", help="User new password")
+    parser.add_argument("-d", "--delete", dest="delete", default=False, action="store_true", help="Delete user")
+    parser.add_argument("-e", "--edit", dest="edit", action="store_true", help="Change user password")
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-l", "--list", dest='list', default=False, action='store_true', help="List all users")
-    group.add_argument("-u", "--username", dest='username', help="User name")
+    group.add_argument("-l", "--list", dest="list", default=False, action="store_true", help="List all users")
+    group.add_argument("-u", "--username", dest="username", help="User name")
 
     options, unknown = parser.parse_known_args()
     return options
@@ -56,7 +56,7 @@ def set_options():
 def solution(options):
     cnx = None
     try:
-        cnx = create_connection('warsztaty_2')
+        cnx = create_connection("warsztaty_2")
         user_obj = User()
         user = None
         password = None
@@ -109,7 +109,7 @@ def solution(options):
                 password = user_obj.load_user_by_name(cursor, options.username).hashed_password
                 if check_password(options.password, password):
                     answer = input("Czy jesteś pewien że chcesz usunąć użytkownika? (T/N)")
-                    possibilities = ['T', 'N']
+                    possibilities = ["T", "N"]
                     while answer not in possibilities:
                         answer = input("Czy jesteś pewien że chcesz usunąć użytkownika? (T/N)")
                     if answer == "T":
@@ -128,13 +128,13 @@ def solution(options):
             users_all = User().load_all_users(cursor)
             for user in users_all:
                 for key, value in user.__dict__.items():
-                    if key != '_User__hashed_password':
-                        key = 'User Id' if key == '_User__id' else key
-                        print('{}: {}'.format(key, value), end='\n')
-                print('\n')
+                    if key != "_User__hashed_password":
+                        key = "User Id" if key == "_User__id" else key
+                        print(f"{key}: {value}", end="\n")
+                print("\n")
             cursor.close()
         else:
-            print('Podaj parametr -h lub --help by zobaczyć możliwe parametry')
+            print("Podaj parametr -h lub --help by zobaczyć możliwe parametry")
     except IntegrityError as e:
         print(e)
     finally:
@@ -142,5 +142,5 @@ def solution(options):
             cnx.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     solution(set_options())
