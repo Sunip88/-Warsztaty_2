@@ -36,7 +36,7 @@ class Message(object):
 
     @staticmethod
     def load_all_message_for_user(cursor, user_id):
-        sql = "SELECT id, from_id, to_id, text, creation_date FROM message where to_id=%s"
+        sql = "SELECT id, from_id, to_id, text, creation_date FROM message where to_id=%s order by creation_date DESC"
         ret = []
         cursor.execute(sql, (user_id,))
         for row in cursor.fetchall():

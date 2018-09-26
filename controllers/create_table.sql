@@ -1,7 +1,7 @@
 CREATE TABLE users
 (
 id serial,
-username VARCHAR (255),
+username VARCHAR (255) unique,
 hashed_password VARCHAR(80),
 email VARCHAR (255) unique,
 PRIMARY KEY (id)

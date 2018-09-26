@@ -6,27 +6,35 @@ from psycopg2 import IntegrityError
 import re
 
 
-def check_email(email):
+def check_email(cursor):
+    email = input('Podaj mail:\n')
     pattern = re.compile(r'^[_a-zA-Z0-9-]+(\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,}){1}$')
-    match = pattern.fullmatch(email)
-    if match is not None:
-        return False
-    return True
+    match = pattern.match(email)
+    match2 = User.load_user_by_mail(cursor, email)
+    while not match or match2 is not None:
+        if not match:
+            print("Adres email jest błędny. Proszę podaj adres w poprawnym formacie")
+        elif match2 is not None:
+            print("Adres email jest juz uzywany. Proszę podaj inny adres")
+        email = input('Podaj mail:\n')
+        match = pattern.match(email)
+        match2 = User.load_user_by_mail(cursor, email)
+    return match.string
 
 
 def new_password(password):
     pattern = re.compile(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$')
     match = pattern.match(password)
     while not match:
-        print("Hasło powinno skladac sie z 8 znakow w tym jedna litera, jedna liczba i jeden znak specjalny")
+        print("Hasło powinno skladac sie z 8 znakow w tym jedna litera, jedna liczba i jeden ze znakw specjalnych (@$!%*#?&)")
         password = input('Podaj hasło:\n')
-        match = pattern.fullmatch(password)
+        match = pattern.match(password)
     return match.string
 
 
 def new_name(name):
     while len(name) < 3:
-        print("Nazwa użytkownika powinna ksłądać się z przynajmniej 3 znaków")
+        print("Nazwa użytkownika powinna składać się z przynajmniej 3 znaków")
         name = input('Podaj Nazwe uzytkownika:\n')
     return name
 
@@ -36,10 +44,10 @@ def set_options():
     parser.add_argument("-p", "--password", dest='password', help="User password")
     parser.add_argument("-n", "--new-pass", dest='newpass', help="User new password")
     parser.add_argument("-d", "--delete", dest='delete', default=False, action='store_true', help="Delete user")
-    parser.add_argument("-e", "--edit", dest='edit', help="Change user password")
+    parser.add_argument("-e", "--edit", dest='edit', action='store_true', help="Change user password")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-l", "--list", dest='list', default=False, action='store_true', help="List all users")
-    group.add_argument("-u", "--email", dest='email', help="User email")
+    group.add_argument("-u", "--username", dest='username', help="User name")
 
     options, unknown = parser.parse_known_args()
     return options
@@ -50,28 +58,25 @@ def solution(options):
     try:
         cnx = create_connection('warsztaty_2')
         user_obj = User()
-        email = None
+        user = None
         password = None
 
-        if options.email and options.password and not options.edit and not options.delete and not options.newpass:
+        if options.username and options.password and not options.edit and not options.delete and not options.newpass:
             cursor = cnx.cursor()
-            if user_obj.load_user_by_mail(cursor, options.email) is not None:
-                email = user_obj.load_user_by_mail(cursor, options.email).email
-                password = user_obj.load_user_by_mail(cursor, options.email).hashed_password
-            if email is not None:
+            if user_obj.load_user_by_name(cursor, options.username) is not None:
+                email = user_obj.load_user_by_name(cursor, options.username).email
+                user = user_obj.load_user_by_name(cursor, options.username).username
+                password = user_obj.load_user_by_name(cursor, options.username).hashed_password
+            if user is not None:
+                print(password)
                 if check_password(options.password, password):
-                    print(f"Użytkownik o emailu {email} już istnieje")
+                    print(f"Użytkownik o emailu {email} i username {user} już istnieje")
                 else:
                     print("Podane hasło jest błędne")
             else:
                 try:
-                    name = input('Podaj Nazwe uzytkownika:\n')
-                    user_obj.username = new_name(name)
-                    email_new = options.email
-                    while check_email(email_new):
-                        print("Adres email jest błędny. Proszę podaj adres w poprawnym formacie")
-                        email_new = input('Podaj mail:\n')
-                    user_obj.email = email_new
+                    user_obj.username = new_name(options.username)
+                    user_obj.email = check_email(cursor)
                     password_new = new_password(options.password)
                     user_obj.set_password(password_new, salt=None)
                     user_obj.save_to_db(cursor)
@@ -80,29 +85,11 @@ def solution(options):
                     print(e, "Proszę podać inny email")
             cursor.close()
 
-        elif options.email and options.password and options.edit and not options.newpass \
-                and not options.delete:
+        elif options.username and options.password and options.newpass and options.edit and not options.delete:
             cursor = cnx.cursor()
-            user = user_obj.load_user_by_mail(cursor, options.email)
+            user = user_obj.load_user_by_name(cursor, options.username)
             if user is not None:
-                password = user_obj.load_user_by_mail(cursor, options.email).hashed_password
-                if check_password(options.password, password):
-                    username_new = new_name(options.edit)
-                    user.username = username_new
-                    user.save_to_db(cursor)
-                    print(f"Nazwa użytkownika o emailu {user.email} została zmieniona na {user.username}")
-                else:
-                    print("Hasło niepoprawne")
-            else:
-                print("Nie ma takiego użytkownika")
-            cursor.close()
-
-        elif options.email and options.password and options.newpass and not options.edit \
-                and not options.delete:
-            cursor = cnx.cursor()
-            user = user_obj.load_user_by_mail(cursor, options.email)
-            if user is not None:
-                password = user_obj.load_user_by_mail(cursor, options.email).hashed_password
+                password = user_obj.load_user_by_name(cursor, options.username).hashed_password
                 if check_password(options.password, password):
                     password_new = new_password(options.newpass)
                     user.set_password(password_new, salt=None)
@@ -114,12 +101,12 @@ def solution(options):
                 print("Nie ma takiego użytkownika")
             cursor.close()
 
-        elif options.email and options.password and options.delete and not options.edit \
+        elif options.username and options.password and options.delete and not options.edit \
                 and not options.newpass:
             cursor = cnx.cursor()
-            user = user_obj.load_user_by_mail(cursor, options.email)
+            user = user_obj.load_user_by_name(cursor, options.username)
             if user is not None:
-                password = user_obj.load_user_by_mail(cursor, options.email).hashed_password
+                password = user_obj.load_user_by_name(cursor, options.username).hashed_password
                 if check_password(options.password, password):
                     answer = input("Czy jesteś pewien że chcesz usunąć użytkownika? (T/N)")
                     possibilities = ['T', 'N']
@@ -146,7 +133,6 @@ def solution(options):
                         print('{}: {}'.format(key, value), end='\n')
                 print('\n')
             cursor.close()
-
         else:
             print('Podaj parametr -h lub --help by zobaczyć możliwe parametry')
     except IntegrityError as e:
